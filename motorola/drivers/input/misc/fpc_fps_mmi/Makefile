@@ -1,3 +1,12 @@
+prod_list := hiphi
+find_target := $(foreach find, $(prod_list), $(findstring $(find), $(TARGET_PRODUCT)))
+find_target := $(strip $(find_target))
+$(warning find_target=$(find_target))
+ifneq ($(find_target),)
+$(warning hiphi sysfs population requirement)
+KBUILD_OPTIONS += CONFIG_INPUT_MISC_FPC1020_SAVE_TO_CLASS_DEVICE=y
+endif
+
 all: modules
 
 modules:

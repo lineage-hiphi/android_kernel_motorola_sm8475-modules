@@ -400,7 +400,9 @@ static int fpc1020_create_sysfs(struct fpc1020_data *fpc1020, bool create) {
 				goto CLASS_CREATE_ERR;
 			}
 		}
-		fpc1020->class_dev = device_create_with_groups(fingerprint_class, NULL,
+
+		/* Pass 'dev' as the parent device instead of NULL. */
+		fpc1020->class_dev = device_create_with_groups(fingerprint_class, dev,
 				MAJOR(dev_no), fpc1020, attribute_groups, "fpc1020");
 		if (IS_ERR(fpc1020->class_dev)) {
 			dev_err(dev, "%s create fingerprint class device failed.\n", __func__);
@@ -411,13 +413,17 @@ static int fpc1020_create_sysfs(struct fpc1020_data *fpc1020, bool create) {
 		return 0;
 	}
 
-	device_destroy(fingerprint_class, MAJOR(dev_no));
-	fpc1020->class_dev = NULL;
+	if (fpc1020->class_dev) {
+		device_destroy(fingerprint_class, MAJOR(dev_no));
+		fpc1020->class_dev = NULL;
+	}
 DEVICE_CREATE_ERR:
-	class_destroy(fingerprint_class);
-	fingerprint_class = NULL;
+	if (fingerprint_class) {
+		class_destroy(fingerprint_class);
+		fingerprint_class = NULL;
+	}
 CLASS_CREATE_ERR:
-	unregister_chrdev_region(dev_no, 1);
+	unregister_chrdev_region(dev_no, MAX_INSTANCE);
 ALLOC_REGION:
 	return rc;
 }
