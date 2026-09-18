@@ -2215,7 +2215,7 @@ static void fg_update_bqfs_workfunc(struct work_struct *work)
 static void fg_dump_registers(struct bq_fg_chip *bq)
 {
 	int i;
-	int ret;
+	int ret __maybe_unused;
 	u16 val;
 
 	for (i = 0; i < ARRAY_SIZE(fg_dump_regs); i++) {
